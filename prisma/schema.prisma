@@ -1,0 +1,96 @@
+// Schéma Prisma pour la boutique Telegram.
+// Production = PostgreSQL (Render).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  telegramId String   @unique
+  username   String?
+  fullName   String?
+  createdAt  DateTime @default(now())
+
+  cart   Cart?
+  orders Order[]
+}
+
+model Category {
+  id       Int    @id @default(autoincrement())
+  name     String
+  parentId Int?
+
+  parent   Category?  @relation("CategoryChildren", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryChildren")
+  products Product[]
+}
+
+model Product {
+  id          Int     @id @default(autoincrement())
+  name        String
+  price       Float
+  image       String?
+  description String?
+  stock       Int     @default(0)
+  active      Boolean @default(true)
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  userId        Int
+  total         Float
+  paymentMethod String   // "BTC" | "USDT"
+  status        String   @default("pending") // pending | paid | cancelled | shipped
+  fullName      String
+  address       String
+  notes         String?
+  proofMessage  String?  // référence du message de preuve envoyé par le client
+  createdAt     DateTime @default(now())
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float // prix unitaire au moment de la commande
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}

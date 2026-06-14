@@ -1,0 +1,31 @@
+{
+  "name": "telegram-shop",
+  "version": "0.1.0",
+  "description": "Boutique e-commerce Telegram avec paiement crypto BTC/USDT",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "DATABASE_URL=file:./dev.db BOT_MODE=polling node src/index.js",
+    "build": "prisma generate && prisma db push",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "data:export": "node scripts/export-data.js",
+    "data:import": "node scripts/import-data.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
