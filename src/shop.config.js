@@ -7,20 +7,20 @@
 
 module.exports = {
   // Display name shown in welcome message header
-  name: "LocalExoticz Shop",
+  name: "Trappucino's Cafe",
 
   // Emoji prepended/appended to the shop name in welcome
-  emoji: "",
+  emoji: "☕",
 
   // Shipping policy line (1-2 short lines max)
-  shippingLine: "🌍 Worldwide Shipping",
-  dispatchLine: "⏰ All orders placed before 1pm are dispatched the same day for fast and reliable delivery.",
+  shippingLine: "🇬🇧 Uk Shipping",
+  dispatchLine: "⏰ All purchases made before 1pm are dispatched the same day fast and reliable delivery",
 
   // Bulk enquiries line
-  bulkLine: "🎫 For bulk enquiries, please open a ticket via the Support button.",
+  bulkLine: "🎫 For bulk enquiries, please open a ticket  Select an option below to get started",
 
   // Channel / community
-  channelUrl: "",            // e.g. "https://t.me/your_channel" — empty hides the button
+  channelUrl: "https://t.me/Trappucinoscafe0",            // e.g. "https://t.me/your_channel" — empty hides the button
   channelLabel: "Join our Channel",
 
   // Owner / support contact (Telegram username without @)
@@ -28,8 +28,8 @@ module.exports = {
   ownerStatusLine: "🟢 Online",  // overridden if you want dynamic status later
 
   // Footer
-  footerLink: "https://t.me/LocalExoticz_bot",
-  footerText: "Powered by LocalExoticz Shop",
+  footerLink: "https://t.me/trappuccinosscafe_ryzebot",
+  footerText: "Powered by Trappucino's Cafe",
 
   // Welcome cover image (path to local file OR public URL OR empty for text-only)
   // Examples:
