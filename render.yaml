@@ -17,7 +17,7 @@ services:
       - key: WEBHOOK_PATH
         value: /api/telegram/webhook
       - key: WEBHOOK_SECRET
-        generateValue: true
+        sync: false
       - key: BTC_WALLET
         sync: false
       - key: LTC_WALLET
