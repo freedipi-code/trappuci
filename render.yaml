@@ -2,7 +2,7 @@ services:
   - type: web
     name: telegram-shop-bot
     runtime: node
-    plan: basic-256mb
+    plan: free
     buildCommand: npm install && npx prisma generate && npx prisma db push
     startCommand: npm start
     envVars:
