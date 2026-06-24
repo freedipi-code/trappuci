@@ -5,23 +5,31 @@ const bot = require('./bot/bot');
 const adminRouter = require('./bot/admin.router');
 
 function setupExpressApp(app) {
-  // Mount admin API routes
+  // Routes API administrateur
   app.use('/api/admin', adminRouter);
-  // Serve admin static dashboard
+
+  // Dashboard administrateur
   app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
-  // Health check
-  app.get('/health', (_req, res) => res.json({ ok: true }));
+
+  // Health check Render
+  app.get('/health', (_req, res) => {
+    res.json({ ok: true });
+  });
 }
 
 async function startPolling() {
   await bot.telegram.deleteWebhook({ drop_pending_updates: false }).catch(() => {});
+
   const me = await bot.telegram.getMe();
+
   console.log(`🤖 Bot lancé en mode POLLING (dev) — @${me.username}`);
-  
-  // Start Express for admin dashboard in development/polling
+
   const app = express();
+
   setupExpressApp(app);
+
   const port = config.webhook.port || 3000;
+
   app.listen(port, () => {
     console.log(`📊 Admin Dashboard disponible sur http://localhost:${port}/admin`);
   });
@@ -33,18 +41,53 @@ async function startWebhook() {
   if (!config.webhook.domain) {
     throw new Error('WEBHOOK_DOMAIN est requis en mode webhook');
   }
+
   const app = express();
-  const url = config.webhook.domain.replace(/\/$/, '') + config.webhook.path;
+
+  /*
+    Render peut fournir :
+    - telegram-shop-bot-4rm0.onrender.com
+    - https://telegram-shop-bot-4rm0.onrender.com
+
+    On retire automatiquement https:// et les slash inutiles.
+  */
+  const webhookDomain = String(config.webhook.domain)
+    .trim()
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '');
+
+  /*
+    Telegram accepte seulement :
+    A-Z, a-z, 0-9, _ et -
+
+    Render generateValue peut produire des caractères comme / + =
+    qui sont refusés par Telegram.
+  */
+  const webhookSecret = config.webhook.secret
+    ? String(config.webhook.secret)
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, '')
+        .slice(0, 256)
+    : undefined;
+
+  const webhookPath = String(config.webhook.path || '/api/telegram/webhook')
+    .trim()
+    .startsWith('/')
+    ? String(config.webhook.path || '/api/telegram/webhook').trim()
+    : `/${String(config.webhook.path || '/api/telegram/webhook').trim()}`;
+
+  const url = `https://${webhookDomain}${webhookPath}`;
 
   setupExpressApp(app);
 
-  // Webhook Telegram avec validation par secret token
-  app.use(await bot.createWebhook({
-    domain: config.webhook.domain,
-    path: config.webhook.path,
-    secret_token: config.webhook.secret || undefined,
-    drop_pending_updates: false,
-  }));
+  app.use(
+    await bot.createWebhook({
+      domain: webhookDomain,
+      path: webhookPath,
+      secret_token: webhookSecret,
+      drop_pending_updates: false,
+    })
+  );
 
   app.listen(config.webhook.port, () => {
     console.log(`🤖 Bot lancé en mode WEBHOOK sur le port ${config.webhook.port}`);
@@ -66,6 +109,6 @@ async function startWebhook() {
   }
 })();
 
-// Arrêt propre
+// Arrêt propre du bot
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
